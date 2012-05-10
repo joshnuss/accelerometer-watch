@@ -1,13 +1,16 @@
 PRG            = display
 OBJ            = display.o
 PROGRAMMER     = usbtiny
-MCU_TARGET     = atmega48
+MCU_TARGET     = atmega8
 AVRDUDE_TARGET = atmega48
 OPTIMIZE       = -Os 
 DEFS           =
 LIBS           =
 HZ             = 1000000
 CC             = avr-gcc
+HFUSE          = 0x99
+LFUSE          = 0xde
+EFUSE          = 0xf3
  
 override CFLAGS        =  -g -DF_CPU=$(HZ) -Wall $(OPTIMIZE) -mmcu=$(MCU_TARGET) $(DEFS)
 override LDFLAGS       = -Wl,-Map,$(PRG).map
@@ -72,9 +75,8 @@ install:  $(PRG).hex
  
 fuse:
 	avrdude -p $(AVRDUDE_TARGET) -c $(PROGRAMMER) -v \
-	-U lfuse:w:0xde:m -U hfuse:w:0x99:m -U efuse:w:0xf3:m
+	-U lfuse:w:$(LFUSE):m -U hfuse:w:$(HFUSE):m -U efuse:w:$(EFUSE):m
 
- 
 ddd: gdbinit
 	ddd --debugger "avr-gdb -x $(GDBINITFILE)"
  
