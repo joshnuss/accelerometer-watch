@@ -19,6 +19,8 @@ The project consists of a schematic, PCB layout, various firmware and a 3D watch
 
 # Documentation
 
+The docs folder contains schematic and pcb layout in original DipTrace and PDF formats
+
 # Models
 
 # Firmware
