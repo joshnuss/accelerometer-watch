@@ -10,12 +10,13 @@ The project consists of a schematic, PCB layout, various firmware and a 3D watch
 
 # Technology
 
-- At the core is an Atmel ATMEGA48 in a QFN-32 package [Datasheet](http://www.atmel.com/Images/doc2545.pdf)
+- At the core is an [Atmel ATMEGA48](http://www.atmel.com/Images/doc2545.pdf) in a QFN-32 package 
 - The system is clocked with a 32.768kHz crystal
 - The electronics are powered by at CR2025 3V coin battery
 - Included is the standard Atmel ICSP 6-pin programming header
 - A right angle push button is included for setting the time
-- The acceleromoter is an Freescale MMA6331LT-ND in an LGA-14 package [Datasheet](http://cache.freescale.com/files/sensors/doc/data_sheet/MMA6331L.pdf)
+- The acceleromoter is an Freescale [MMA6331LT-ND](http://cache.freescale.com/files/sensors/doc/data_sheet/MMA6331L.pdf) in an LGA-14 package 
+- The display is a [LDQ-M286RI](http://www.lumex.com/specs/LDQ-M286RI.pdf)
 
 # Documentation
 
