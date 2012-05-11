@@ -6,7 +6,7 @@ The Accelerometer Watch uses an accelerometer to detect when the wearer lifts th
 The display is automatically turned on when the arm is lifted and the turned off to conserve power when the arm is lowered.
 Most parts have been changed to surface mount to reduce the overall size and cost of the watch.
 
-The project consists of a schematic, PCB layout, various firmware and a 3D watchface design suitable for 3D printing.
+The project consists of a schematic, PCB layout, Bill of Materials, various firmware and a 3D watchface design suitable for 3D printing.
 
 # Technology
 
@@ -20,7 +20,7 @@ The project consists of a schematic, PCB layout, various firmware and a 3D watch
 
 # Documentation
 
-The docs folder contains schematic and pcb layout in both DipTrace and PDF formats
+The docs folder contains the Bill of Materials as well as the schematic and pcb layout in both DipTrace and PDF formats
 
 # Models
 
