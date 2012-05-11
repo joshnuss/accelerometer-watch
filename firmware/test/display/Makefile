@@ -1,18 +1,18 @@
 PRG            = display
 OBJ            = display.o
 PROGRAMMER     = usbtiny
-MCU_TARGET     = atmega8
+MCU_TARGET     = atmega48
 AVRDUDE_TARGET = atmega48
 OPTIMIZE       = -Os 
 DEFS           =
 LIBS           =
-HZ             = 1000000
+HZ             = 32768
 CC             = avr-gcc
-HFUSE          = 0x99
-LFUSE          = 0xde
-EFUSE          = 0xf3
+LFUSE          = 0xC4
+HFUSE          = 0xFF
+EFUSE          = 0xFF
  
-override CFLAGS        =  -g -DF_CPU=$(HZ) -Wall $(OPTIMIZE) -mmcu=$(MCU_TARGET) $(DEFS)
+override CFLAGS        = -g -DF_CPU=$(HZ) -Wall $(OPTIMIZE) -mmcu=$(MCU_TARGET) $(DEFS)
 override LDFLAGS       = -Wl,-Map,$(PRG).map
  
 OBJCOPY        = avr-objcopy
@@ -70,7 +70,7 @@ esrec: $(PRG)_eeprom.srec
  
 # command to program chip (invoked by running "make install")
 install:  $(PRG).hex
-	avrdude -p $(AVRDUDE_TARGET) -c $(PROGRAMMER) -v -B 1  \
+	avrdude -p $(AVRDUDE_TARGET) -c $(PROGRAMMER) -B 160 -v \
          -U flash:w:$(PRG).hex 
  
 fuse:

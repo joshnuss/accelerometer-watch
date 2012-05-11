@@ -105,59 +105,84 @@ void disable_digit(uint8_t digit) {
 }
 
 void clear_display() {
-  LED_A_PORT &= ~_BV(LED_A_PIN);
-  LED_B_PORT &= ~_BV(LED_B_PIN);
-  LED_C_PORT &= ~_BV(LED_C_PIN);
-  LED_D_PORT &= ~_BV(LED_D_PIN);
-  LED_E_PORT &= ~_BV(LED_E_PIN);
-  LED_F_PORT &= ~_BV(LED_F_PIN);
-  LED_G_PORT &= ~_BV(LED_G_PIN);
-  LED_DP_PORT &= ~_BV(LED_DP_PIN);
+  LED_A_PORT |= _BV(LED_A_PIN);
+  LED_B_PORT |= _BV(LED_B_PIN);
+  LED_C_PORT |= _BV(LED_C_PIN);
+  LED_D_PORT |= _BV(LED_D_PIN);
+  LED_E_PORT |= _BV(LED_E_PIN);
+  LED_F_PORT |= _BV(LED_F_PIN);
+  LED_G_PORT |= _BV(LED_G_PIN);
+  LED_DP_PORT |= _BV(LED_DP_PIN);
 }
+
+uint8_t digit_map[] = {
+  0b0111111,
+  0b0000110,
+  0b1011011,
+  0b1001111,
+  0b1100110,
+  0b1101101,
+  0b1111101,
+  0b0000111,
+  0b1111111,
+  0b1101111};
 
 void update_display(uint8_t number, bool show_dp) {
   clear_display();
 
   if (show_dp)
-    LED_DP_PORT |= _BV(LED_DP_PIN);
+    LED_DP_PORT &= ~_BV(LED_DP_PIN);
 
-  if (number == 0 || number == 2 || number == 3 || number > 4)
-    LED_A_PORT |= _BV(LED_A_PIN);
+  uint8_t mask = digit_map[number];
 
-  if (number < 5 || number > 6)
-    LED_B_PORT |= _BV(LED_B_PIN);
+  if (mask & _BV(0))
+    LED_A_PORT &= ~_BV(LED_A_PIN);
 
-  if (number != 2)
-    LED_C_PORT |= _BV(LED_C_PIN);
+  if (mask & _BV(1))
+    LED_B_PORT &= ~_BV(LED_B_PIN);
 
-  if ( !(number == 1 || number == 4 || number == 7) )
-    LED_D_PORT |= _BV(LED_D_PIN);
+  if (mask & _BV(2))
+    LED_C_PORT &= ~_BV(LED_C_PIN);
 
-  if (number == 0 || number == 2 || number == 6 || number == 8)
-    LED_E_PORT |= _BV(LED_E_PIN);
+  if (mask & _BV(3))
+    LED_D_PORT &= ~_BV(LED_D_PIN);
 
-  if (number == 0 || (number > 3 && number != 7))
-    LED_F_PORT |= _BV(LED_F_PIN);
+  if (mask & _BV(4))
+    LED_E_PORT &= ~_BV(LED_E_PIN);
 
-  if (number > 1 && number != 7)
-    LED_G_PORT |= _BV(LED_G_PIN);
+  if (mask & _BV(5))
+    LED_F_PORT &= ~_BV(LED_F_PIN);
+
+  if (mask & _BV(6))
+    LED_G_PORT &= ~_BV(LED_G_PIN);
 }
 
 int main() {
   initialize();
 
+  enable_digit(3);
+  update_display(0, false);
+  _delay_ms(1000);
+  update_display(1, false);
+  _delay_ms(1000);
+  update_display(2, false);
+  _delay_ms(1000);
+  disable_digit(3);
+
   while(1) {
-    uint8_t digit, number;
+    uint8_t digit, number, i;
 
-    for (digit=0; digit<4;digit++) {
-      enable_digit(digit);
+    for (number=0;number<=9;number++) {
+      for (i=0;i<250;i++) {
+        for (digit=0; digit<4;digit++) {
+          enable_digit(digit);
 
-      for (number=0;number<=9;number++) {
-        update_display(number, true);
-        _delay_ms(1000);
+          update_display(number, false);
+          _delay_us(100);
+
+          disable_digit(digit);
+        }
       }
-
-      disable_digit(digit);
     }
   }
 
