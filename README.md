@@ -10,7 +10,7 @@ The project consists of a schematic, PCB layout, Bill of Materials, various firm
 
 # Technology
 
-- At the core is an [Atmel ATMEGA48](http://www.atmel.com/Images/doc2545.pdf) in a QFN-32 package 
+- At the core is an [Atmel ATMEGA48](http://www.atmel.com/Images/doc2545.pdf) microcontroller in a MLF-32 package 
 - The system is clocked with a 32.768kHz crystal
 - The electronics are powered by a CR2025 3V coin battery
 - Included is the standard Atmel ICSP 6-pin programming header
