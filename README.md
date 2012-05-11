@@ -1,6 +1,6 @@
 # Accelerometer Watch
 
-A derivative of the excellent SolderTime watch by [Spikenzie Labs](http://spikenzielabs.com/SpikenzieLabs/SolderTime.html)
+Inspired by the awesome SolderTime watch by [Spikenzie Labs](http://spikenzielabs.com/SpikenzieLabs/SolderTime.html)
 
 The Accelerometer Watch uses an accelerometer to detect when the wearer lifts their arm. 
 The display is automatically turned on when the arm is lifted and the turned off to conserve power when the arm is lowered.
@@ -12,15 +12,15 @@ The project consists of a schematic, PCB layout, various firmware and a 3D watch
 
 - At the core is an [Atmel ATMEGA48](http://www.atmel.com/Images/doc2545.pdf) in a QFN-32 package 
 - The system is clocked with a 32.768kHz crystal
-- The electronics are powered by at CR2025 3V coin battery
+- The electronics are powered by a CR2025 3V coin battery
 - Included is the standard Atmel ICSP 6-pin programming header
 - A right angle push button is included for setting the time
-- The acceleromoter is an Freescale [MMA6331LT-ND](http://cache.freescale.com/files/sensors/doc/data_sheet/MMA6331L.pdf) in an LGA-14 package 
-- The display is a [LDQ-M286RI](http://www.lumex.com/specs/LDQ-M286RI.pdf)
+- The acceleromoter is a [Freescale MMA6331LT-ND](http://cache.freescale.com/files/sensors/doc/data_sheet/MMA6331L.pdf) in an LGA-14 package 
+- The display is a [Lumex LDQ-M286RI](http://www.lumex.com/specs/LDQ-M286RI.pdf)
 
 # Documentation
 
-The docs folder contains schematic and pcb layout in original DipTrace and PDF formats
+The docs folder contains schematic and pcb layout in both DipTrace and PDF formats
 
 # Models
 
