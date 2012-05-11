@@ -1,4 +1,5 @@
 #include <avr/io.h>
+#include <avr/pgmspace.h>
 #include <util/delay.h>
 #include <stdbool.h>
 
@@ -115,17 +116,17 @@ void clear_display() {
   LED_DP_PORT |= _BV(LED_DP_PIN);
 }
 
-uint8_t digit_map[] = {
-  0b0111111,
-  0b0000110,
-  0b1011011,
-  0b1001111,
-  0b1100110,
-  0b1101101,
-  0b1111101,
-  0b0000111,
-  0b1111111,
-  0b1101111};
+static uint8_t digit_map[] PROGMEM = {
+  0b00111111,
+  0b00000110,
+  0b01011011,
+  0b01001111,
+  0b01100110,
+  0b01101101,
+  0b01111101,
+  0b00000111,
+  0b01111111,
+  0b01101111};
 
 void update_display(uint8_t number, bool show_dp) {
   clear_display();
@@ -133,7 +134,7 @@ void update_display(uint8_t number, bool show_dp) {
   if (show_dp)
     LED_DP_PORT &= ~_BV(LED_DP_PIN);
 
-  uint8_t mask = digit_map[number];
+  uint8_t mask = pgm_read_byte(&digit_map[number]);
 
   if (mask & _BV(0))
     LED_A_PORT &= ~_BV(LED_A_PIN);
