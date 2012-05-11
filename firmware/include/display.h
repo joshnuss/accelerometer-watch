@@ -58,15 +58,15 @@
 #define SEGMENT_G _BV(6)
 
 /*
-	 -- A --
-	|       |
-  F       B
-	|       |
-	 -- G -- 
-	|       |
-	E       C
-	|       |
-	 -- D -- 
+ -- A --
+|       |
+F       B
+|       |
+ -- G -- 
+|       |
+E       C
+|       |
+ -- D -- 
 */
 
 static uint8_t character_map[] PROGMEM = {
