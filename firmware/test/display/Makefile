@@ -6,13 +6,14 @@ AVRDUDE_TARGET = atmega48
 OPTIMIZE       = -Os 
 DEFS           =
 LIBS           =
+INCLUDES       = ../../include
 HZ             = 32768
 CC             = avr-gcc
 LFUSE          = 0xC4
 HFUSE          = 0xFF
 EFUSE          = 0xFF
  
-override CFLAGS        = -g -DF_CPU=$(HZ) -Wall $(OPTIMIZE) -mmcu=$(MCU_TARGET) $(DEFS)
+override CFLAGS        = -g -I$(INCLUDES) -DF_CPU=$(HZ) -Wall $(OPTIMIZE) -mmcu=$(MCU_TARGET) $(DEFS)
 override LDFLAGS       = -Wl,-Map,$(PRG).map
  
 OBJCOPY        = avr-objcopy
