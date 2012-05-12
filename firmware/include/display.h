@@ -165,25 +165,25 @@ void update_display(uint8_t number, bool show_dp) {
 
   uint8_t mask = pgm_read_byte(&character_map[number]);
 
-  if (mask & _BV(0))
+  if (mask & SEGMENT_A)
     LED_A_PORT &= ~_BV(LED_A_INDEX);
 
-  if (mask & _BV(1))
+  if (mask & SEGMENT_B)
     LED_B_PORT &= ~_BV(LED_B_INDEX);
 
-  if (mask & _BV(2))
+  if (mask & SEGMENT_C)
     LED_C_PORT &= ~_BV(LED_C_INDEX);
 
-  if (mask & _BV(3))
+  if (mask & SEGMENT_D)
     LED_D_PORT &= ~_BV(LED_D_INDEX);
 
-  if (mask & _BV(4))
+  if (mask & SEGMENT_E)
     LED_E_PORT &= ~_BV(LED_E_INDEX);
 
-  if (mask & _BV(5))
+  if (mask & SEGMENT_F)
     LED_F_PORT &= ~_BV(LED_F_INDEX);
 
-  if (mask & _BV(6))
+  if (mask & SEGMENT_G)
     LED_G_PORT &= ~_BV(LED_G_INDEX);
 }
 
