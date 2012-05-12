@@ -104,15 +104,27 @@ void configure_display() {
 void enable_digit(uint8_t digit) {
   switch(digit) {
     case 0:
+      LED_DIGIT2_PORT &= ~_BV(LED_DIGIT2_INDEX);
+      LED_DIGIT3_PORT &= ~_BV(LED_DIGIT3_INDEX);
+      LED_DIGIT4_PORT &= ~_BV(LED_DIGIT4_INDEX);
       LED_DIGIT1_PORT |= _BV(LED_DIGIT1_INDEX);
       break;
     case 1:
+      LED_DIGIT1_PORT &= ~_BV(LED_DIGIT1_INDEX);
+      LED_DIGIT3_PORT &= ~_BV(LED_DIGIT3_INDEX);
+      LED_DIGIT4_PORT &= ~_BV(LED_DIGIT4_INDEX);
       LED_DIGIT2_PORT |= _BV(LED_DIGIT2_INDEX);
       break;
     case 2:
+      LED_DIGIT1_PORT &= ~_BV(LED_DIGIT1_INDEX);
+      LED_DIGIT2_PORT &= ~_BV(LED_DIGIT2_INDEX);
+      LED_DIGIT4_PORT &= ~_BV(LED_DIGIT4_INDEX);
       LED_DIGIT3_PORT |= _BV(LED_DIGIT3_INDEX);
       break;
     case 3:
+      LED_DIGIT1_PORT &= ~_BV(LED_DIGIT1_INDEX);
+      LED_DIGIT2_PORT &= ~_BV(LED_DIGIT2_INDEX);
+      LED_DIGIT3_PORT &= ~_BV(LED_DIGIT3_INDEX);
       LED_DIGIT4_PORT |= _BV(LED_DIGIT4_INDEX);
       break;
   }
@@ -147,7 +159,6 @@ void clear_display() {
 }
 
 void update_display(uint8_t number, bool show_dp) {
-  clear_display();
 
   if (show_dp)
     LED_DP_PORT &= ~_BV(LED_DP_INDEX);
