@@ -26,6 +26,7 @@ volatile uint8_t current_digit = 0;
 uint8_t current_digit_val = 0;
 volatile uint16_t button_pressed_count = 0;
 volatile uint8_t display_on_count = 0;
+volatile bool blink_on = true;
 
 void configure_clock_timer() {
   TCCR1A = 0;  
@@ -42,6 +43,7 @@ void configure_display_timer() {
 
 void enable_display() {
   display_on_count = 0;
+  blink_on = true;
   TIMSK0 |= _BV(OCIE0B); // enable timer
 }
 void disable_display() {
@@ -158,15 +160,30 @@ ISR(INT0_vect) {
   }
 }
 
+volatile bool show_digit = false;
+volatile uint16_t blink_count = 0;
+
 ISR(TIMER0_COMPB_vect) {
-  if (mode == MODE_SET_HOURS || mode == MODE_SET_MINUTES)
+  if (mode == MODE_SET_HOURS || mode == MODE_SET_MINUTES) {
     current = temp;
-  else
+    if (++blink_count > 20) {
+      blink_count = 0;
+      if (blink_on)
+        blink_on = false;
+      else
+        blink_on = true;
+    }
+  }
+  else {
     current = time;
+  }
+
+  show_digit = true;
 
   switch (current_digit) {
     case 0:
       current_digit_val = current.hours / 10; 
+      if (current_digit_val == 0) show_digit = false;
       break;
     case 1:
       current_digit_val = current.hours % 10; 
@@ -180,7 +197,7 @@ ISR(TIMER0_COMPB_vect) {
   }
 
   clear_display();
-  if (current_digit > 0 || current_digit_val > 0) {
+  if (show_digit && blink_on) {
     enable_digit(current_digit);
     update_display(current_digit_val, current_digit == 1);
   }
