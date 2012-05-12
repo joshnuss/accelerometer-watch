@@ -30,7 +30,7 @@ void configure_clock_timer() {
 void configure_display_timer() {
   TCCR0A = _BV(WGM01); // mode = CTC 
   TCCR0B = _BV(CS00); // Mode = CTC, no prescaler
-  OCR0A = 10;
+  OCR0A = 5;
 }
 
 void enable_display() {
@@ -92,16 +92,16 @@ ISR(INT0_vect) {
 ISR(TIMER0_COMPA_vect) {
   switch (current_digit) {
     case 0:
-      current_digit_val = time.minutes / 10; 
+      current_digit_val = time.hours / 10; 
       break;
     case 1:
-      current_digit_val = time.minutes % 10; 
+      current_digit_val = time.hours % 10; 
       break;
     case 2:
-      current_digit_val = time.seconds / 10; 
+      current_digit_val = time.minutes / 10; 
       break;
     case 3:
-      current_digit_val = time.seconds % 10; 
+      current_digit_val = time.minutes % 10; 
       break;
   }
 
