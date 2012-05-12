@@ -183,21 +183,30 @@ ISR(TIMER0_COMPB_vect) {
   switch (current_digit) {
     case 0:
       current_digit_val = current.hours / 10; 
-      if (current_digit_val == 0) show_digit = false;
+      if (current_digit_val == 0) 
+        show_digit = false;
+      else if (mode == MODE_SET_HOURS)
+        show_digit = blink_on;
       break;
     case 1:
       current_digit_val = current.hours % 10; 
+      if (mode == MODE_SET_HOURS)
+        show_digit = blink_on;
       break;
     case 2:
       current_digit_val = current.minutes / 10; 
+      if (mode == MODE_SET_MINUTES)
+        show_digit = blink_on;
       break;
     case 3:
       current_digit_val = current.minutes % 10; 
+      if (mode == MODE_SET_MINUTES)
+        show_digit = blink_on;
       break;
   }
 
   clear_display();
-  if (show_digit && blink_on) {
+  if (show_digit) {
     enable_digit(current_digit);
     update_display(current_digit_val, current_digit == 1);
   }
