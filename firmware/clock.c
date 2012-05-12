@@ -33,7 +33,7 @@ void configure_clock_timer() {
 void configure_display_timer() {
   TCCR0A = _BV(WGM01); // mode = CTC 
   TCCR0B = _BV(CS00); // Mode = CTC, no prescaler
-  OCR0A = 510; // increment button presses every 100 ticks
+  OCR0A = 128; // increment button presses every 100 ticks
   OCR0B = 5; // update display every 5 ticks
 }
 
@@ -94,6 +94,7 @@ int main() {
 
 ISR(INT0_vect) {
   if (button_is_pressed()) {
+    button_pressed_count = 0;
     enable_button_counter();
   }
   else {
@@ -107,7 +108,6 @@ ISR(INT0_vect) {
         enable_display();
       }
     }
-    button_pressed_count = 0;
     disable_button_counter();
   }
 }
