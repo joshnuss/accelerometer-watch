@@ -12,13 +12,14 @@
 #define MODE_SET_HOURS 2
 #define MODE_SET_MINUTES 3
 
-#define BUTTON_PRESS_THRESHOLD 10
+#define BUTTON_PRESS_SHORT_THRESHOLD 10
+#define BUTTON_PRESS_LONG_THRESHOLD 200
 #define DISPLAY_AUTO_SHUTOFF_SECONDS 6
 
 volatile struct { 
   uint8_t hours; 
   uint8_t minutes; 
-  uint8_t seconds } time, temp;
+  uint8_t seconds } time, current, temp;
 
 volatile uint8_t mode = MODE_OFF;
 volatile uint8_t current_digit = 0;
@@ -40,12 +41,13 @@ void configure_display_timer() {
 }
 
 void enable_display() {
+  display_on_count = 0;
   TIMSK0 |= _BV(OCIE0B); // enable timer
 }
 void disable_display() {
+  display_on_count = 0;
   TIMSK0 &= ~_BV(OCIE0B); // disable timer
   clear_display();
-  display_on_count = 0;
 }
 void enable_button_counter() {
   TIMSK0 |= _BV(OCIE0A); // enable timer
@@ -80,6 +82,56 @@ void increment_seconds() {
   }
 }
 
+void handle_short_button_press() {
+  switch(mode) {
+    case MODE_OFF:
+      mode = MODE_DISPLAY_TIME;
+      enable_display();
+      break;
+    case MODE_DISPLAY_TIME:
+      mode = MODE_OFF;
+      disable_display();
+      break;
+    case MODE_SET_HOURS:
+      temp.hours++;
+      if (temp.hours > 12)
+        temp.hours = 1;
+      break;
+    case MODE_SET_MINUTES:
+      temp.minutes++;
+      if (temp.hours > 59)
+        temp.hours = 0;
+      break;
+  }
+}
+
+void handle_long_button_press() {
+  switch(mode) {
+    case MODE_OFF:
+    case MODE_DISPLAY_TIME:
+      mode = MODE_SET_MINUTES;
+      temp.hours = time.hours;
+      temp.minutes = time.minutes;
+      enable_display();
+      break;
+    case MODE_SET_MINUTES:
+      mode = MODE_SET_HOURS;
+      break;
+    case MODE_SET_HOURS:
+      time = temp;
+      mode = MODE_DISPLAY_TIME;
+      enable_display();
+      break;
+  }
+}
+
+void handle_button_press() {
+  if (button_pressed_count >= BUTTON_PRESS_LONG_THRESHOLD)
+    handle_long_button_press();
+  else if (button_pressed_count >= BUTTON_PRESS_SHORT_THRESHOLD)
+    handle_short_button_press();
+}
+
 int main() {
   initialize();
 
@@ -101,33 +153,29 @@ ISR(INT0_vect) {
     enable_button_counter();
   }
   else {
-    if (button_pressed_count >= BUTTON_PRESS_THRESHOLD) {
-      if (mode == MODE_DISPLAY_TIME) {
-        mode = MODE_OFF;
-        disable_display();
-      }
-      else {
-        mode = MODE_DISPLAY_TIME;
-        enable_display();
-      }
-    }
+    handle_button_press();
     disable_button_counter();
   }
 }
 
 ISR(TIMER0_COMPB_vect) {
+  if (mode == MODE_SET_HOURS || mode == MODE_SET_MINUTES)
+    current = temp;
+  else
+    current = time;
+
   switch (current_digit) {
     case 0:
-      current_digit_val = time.hours / 10; 
+      current_digit_val = current.hours / 10; 
       break;
     case 1:
-      current_digit_val = time.hours % 10; 
+      current_digit_val = current.hours % 10; 
       break;
     case 2:
-      current_digit_val = time.minutes / 10; 
+      current_digit_val = current.minutes / 10; 
       break;
     case 3:
-      current_digit_val = time.minutes % 10; 
+      current_digit_val = current.minutes % 10; 
       break;
   }
 
