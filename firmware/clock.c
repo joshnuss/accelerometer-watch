@@ -12,6 +12,8 @@
 #define MODE_SET_HOURS 2
 #define MODE_SET_MINUTES 3
 
+#define BUTTON_PRESS_THRESHOLD 10
+
 volatile struct { 
   uint8_t hours; 
   uint8_t minutes; 
@@ -19,7 +21,8 @@ volatile struct {
 
 volatile uint8_t mode = MODE_OFF;
 volatile uint8_t current_digit = 0;
-volatile uint8_t current_digit_val = 0;
+uint8_t current_digit_val = 0;
+volatile uint16_t button_pressed_count = 0;
 
 void configure_clock_timer() {
   TCCR1A = 0;  
@@ -30,15 +33,22 @@ void configure_clock_timer() {
 void configure_display_timer() {
   TCCR0A = _BV(WGM01); // mode = CTC 
   TCCR0B = _BV(CS00); // Mode = CTC, no prescaler
-  OCR0A = 5;
+  OCR0A = 510; // increment button presses every 100 ticks
+  OCR0B = 5; // update display every 5 ticks
 }
 
 void enable_display() {
-  TIMSK0 |= _BV(OCIE0A); // enable timer
+  TIMSK0 |= _BV(OCIE0B); // enable timer
 }
 void disable_display() {
-  TIMSK0 &= ~_BV(OCIE0A); // disable timer
+  TIMSK0 &= ~_BV(OCIE0B); // disable timer
   clear_display();
+}
+void enable_button_counter() {
+  TIMSK0 |= _BV(OCIE0A); // enable timer
+}
+void disable_button_counter() {
+  TIMSK0 &= ~_BV(OCIE0A); // disable timer
 }
 
 void configure_timers() {
@@ -83,13 +93,26 @@ int main() {
 }
 
 ISR(INT0_vect) {
-  if (button_is_pressed())
-    enable_display();
-  else
-    disable_display();
+  if (button_is_pressed()) {
+    enable_button_counter();
+  }
+  else {
+    if (button_pressed_count >= BUTTON_PRESS_THRESHOLD) {
+      if (mode == MODE_DISPLAY_TIME) {
+        mode = MODE_OFF;
+        disable_display();
+      }
+      else {
+        mode = MODE_DISPLAY_TIME;
+        enable_display();
+      }
+    }
+    button_pressed_count = 0;
+    disable_button_counter();
+  }
 }
 
-ISR(TIMER0_COMPA_vect) {
+ISR(TIMER0_COMPB_vect) {
   switch (current_digit) {
     case 0:
       current_digit_val = time.hours / 10; 
@@ -113,6 +136,10 @@ ISR(TIMER0_COMPA_vect) {
 
   if(++current_digit > 3) 
     current_digit = 0;
+}
+
+ISR(TIMER0_COMPA_vect) {
+  button_pressed_count++;
 }
 
 ISR(TIMER1_COMPA_vect) {
