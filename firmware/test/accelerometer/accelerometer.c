@@ -5,13 +5,20 @@
 #include "display.h"
 #include "button.h"
 
+#define ACCELEROMTER_SLEEP_DDR DDRD
+#define ACCELEROMTER_SLEEP_PORT PORTD
+#define ACCELEROMTER_SLEEP_INDEX 6
+
+#define X_ADC_CHANNEL 6
+#define Y_ADC_CHANNEL 7
+
 volatile uint16_t last_sample=0;
 volatile uint16_t updates=0;
 volatile uint8_t digit1 = 0;
 volatile uint8_t digit2 = 0;
 volatile uint8_t digit3 = 0;
 volatile uint8_t digit4 = 0;
-volatile uint8_t digit=0;
+volatile uint8_t current_digit=0;
 
 void set_sample(uint16_t sample) {
   last_sample = sample;
@@ -37,16 +44,33 @@ void configure_timer() {
   TIMSK0 = _BV(OCIE0A); // enable timer
 }
 
+uint16_t read_adc(uint8_t channel) {
+  ADMUX &= 0b11110000;
+  ADMUX |= channel;
+  ADCSRA |= _BV(ADSC); // start conversion
+  while(!bit_is_set(ADCSRA, ADIF));
+
+  ADCSRA |= _BV(ADIF);
+
+  return ADCW;
+}
+
+void configure_accelerometer() {
+  ADCSRA = _BV(ADEN); // enable ADC
+
+  ACCELEROMTER_SLEEP_DDR |= _BV(ACCELEROMTER_SLEEP_INDEX);
+  ACCELEROMTER_SLEEP_PORT |= _BV(ACCELEROMTER_SLEEP_INDEX);
+}
+
 void initialize() {
   configure_timer();
   configure_display();
   configure_button();
+  configure_accelerometer();
 }
 
 int main() {
   initialize();
-
-  set_sample(24);
 
   sei();
 
@@ -59,15 +83,20 @@ int main() {
 }
 
 ISR(INT0_vect) {
-  if (button_is_pressed())
-      set_sample(0);
 }
 
 uint8_t val;
 
 ISR(TIMER0_COMPA_vect) {
   updates++;
-  switch (digit) {
+  if (updates>50) {
+    updates = 0;
+    if (button_is_pressed())
+      set_sample(read_adc(Y_ADC_CHANNEL));
+    else
+      set_sample(read_adc(X_ADC_CHANNEL));
+  }
+  switch (current_digit) {
     case 0:
       val = digit1; 
       break;
@@ -83,13 +112,9 @@ ISR(TIMER0_COMPA_vect) {
   }
 
   clear_display();
-  enable_digit(digit);
-  update_display(val, false);
+  enable_digit(current_digit);
+  update_display(val, last_sample > 500);
 
-  if(++digit > 3) digit = 0;
-  if (updates == 10) {
-    set_sample(last_sample+1);
-    updates = 0;
-  }
+  if(++current_digit > 3) current_digit = 0;
 
 }
