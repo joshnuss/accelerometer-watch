@@ -13,22 +13,22 @@
 #define MODE_SET_MINUTES 3
 
 volatile struct { 
-	uint8_t hours; 
-	uint8_t minutes; 
-	uint8_t seconds } time, temp;
+  uint8_t hours; 
+  uint8_t minutes; 
+  uint8_t seconds } time, temp;
 
 volatile uint8_t mode = MODE_OFF;
 volatile uint8_t current_digit = 0;
 volatile uint8_t current_digit_val = 0;
 
 void configure_clock_timer() {
-	TCCR1A = 0;  
-	TCCR1B = _BV(WGM12) | _BV(CS12) | _BV(CS10);  //set mode = CTC, prescaler = clock/1024
+  TCCR1A = 0;  
+  TCCR1B = _BV(WGM12) | _BV(CS12) | _BV(CS10);  //set mode = CTC, prescaler = clock/1024
   OCR1A  = 32;
-	TIMSK1 = _BV(OCIE1A); //enable interrupt on overflow
+  TIMSK1 = _BV(OCIE1A); //enable interrupt on overflow
 }
 void configure_display_timer() {
-	TCCR0A = _BV(WGM01); // mode = CTC 
+  TCCR0A = _BV(WGM01); // mode = CTC 
   TCCR0B = _BV(CS00); // Mode = CTC, no prescaler
   OCR0A = 10;
 }
@@ -54,17 +54,17 @@ void initialize() {
 }
 
 void increment_seconds() {
-	if (++time.seconds > 59) {
-		time.seconds = 0;
-		
-		if (++time.minutes > 59) {
-			time.minutes = 0;
-			
-			if(++time.hours > 12) {
-				time.hours = 1;
-			}
-		}
-	}
+  if (++time.seconds > 59) {
+    time.seconds = 0;
+
+    if (++time.minutes > 59) {
+      time.minutes = 0;
+
+      if(++time.hours > 12) {
+        time.hours = 1;
+      }
+    }
+  }
 }
 
 int main() {
@@ -78,7 +78,7 @@ int main() {
 
   while(1)
     sleep_mode();
-  
+
   return 0;
 }
 
