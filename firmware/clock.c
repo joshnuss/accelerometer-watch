@@ -14,7 +14,8 @@
 
 #define BUTTON_PRESS_SHORT_THRESHOLD 10
 #define BUTTON_PRESS_LONG_THRESHOLD 200
-#define DISPLAY_AUTO_SHUTOFF_SECONDS 6
+#define DISPLAY_AUTO_SHUTOFF_SECONDS 4
+#define BLINK_RATE 20
 
 volatile struct { 
   uint8_t hours; 
@@ -27,12 +28,16 @@ uint8_t current_digit_val = 0;
 volatile uint16_t button_pressed_count = 0;
 volatile uint8_t display_on_count = 0;
 volatile bool blink_on = true;
+volatile uint16_t xsample = 0;
+volatile uint16_t ysample = 0;
+volatile bool cleared = false;
 
 void configure_clock_timer() {
   TCCR1A = 0;  
   TCCR1B = _BV(WGM12) | _BV(CS12) | _BV(CS10);  //set mode = CTC, prescaler = clock/1024
   OCR1A  = 32;
-  TIMSK1 = _BV(OCIE1A); //enable interrupt on overflow
+  OCR1B  = 4;
+  TIMSK1 = _BV(OCIE1A) | _BV(OCIE1B); //enable interrupt on overflow
 }
 void configure_display_timer() {
   TCCR0A = _BV(WGM01); // mode = CTC 
@@ -101,8 +106,8 @@ void handle_short_button_press() {
       break;
     case MODE_SET_MINUTES:
       temp.minutes++;
-      if (temp.hours > 59)
-        temp.hours = 0;
+      if (temp.minutes > 59)
+        temp.minutes = 0;
       break;
   }
 }
@@ -166,7 +171,7 @@ volatile uint16_t blink_count = 0;
 ISR(TIMER0_COMPB_vect) {
   if (mode == MODE_SET_HOURS || mode == MODE_SET_MINUTES) {
     current = temp;
-    if (++blink_count > 20) {
+    if (++blink_count > BLINK_RATE) {
       blink_count = 0;
       if (blink_on)
         blink_on = false;
@@ -226,7 +231,28 @@ ISR(TIMER1_COMPA_vect) {
     display_on_count++;
     if (display_on_count > DISPLAY_AUTO_SHUTOFF_SECONDS) {
       mode = MODE_OFF;
+      cleared = false;
       disable_display();
     }
+  }
+}
+
+ISR(TIMER1_COMPB_vect) {
+  xsample = read_adc(X_ADC_CHANNEL);
+  ysample = read_adc(Y_ADC_CHANNEL);
+
+  if (xsample > 478 && xsample < 575 && ysample > 500) {
+    if (mode == MODE_OFF && cleared == true) {
+      mode = MODE_DISPLAY_TIME;
+      cleared = false;
+      enable_display();
+    }
+  }
+  else {
+    if (mode == MODE_DISPLAY_TIME) {
+      mode = MODE_OFF;
+      disable_display();
+    }
+    cleared = true;
   }
 }
