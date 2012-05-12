@@ -5,7 +5,7 @@
 #include "display.h"
 
 void initialize() {
-  configure_display_outputs();
+  configure_display();
 }
 
 int main() {
