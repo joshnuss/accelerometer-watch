@@ -13,6 +13,7 @@
 #define MODE_SET_MINUTES 3
 
 #define BUTTON_PRESS_THRESHOLD 10
+#define DISPLAY_AUTO_SHUTOFF_SECONDS 6
 
 volatile struct { 
   uint8_t hours; 
@@ -23,6 +24,7 @@ volatile uint8_t mode = MODE_OFF;
 volatile uint8_t current_digit = 0;
 uint8_t current_digit_val = 0;
 volatile uint16_t button_pressed_count = 0;
+volatile uint8_t display_on_count = 0;
 
 void configure_clock_timer() {
   TCCR1A = 0;  
@@ -33,7 +35,7 @@ void configure_clock_timer() {
 void configure_display_timer() {
   TCCR0A = _BV(WGM01); // mode = CTC 
   TCCR0B = _BV(CS00); // Mode = CTC, no prescaler
-  OCR0A = 128; // increment button presses every 100 ticks
+  OCR0A = 100; // increment button presses every 100 ticks
   OCR0B = 5; // update display every 5 ticks
 }
 
@@ -43,6 +45,7 @@ void enable_display() {
 void disable_display() {
   TIMSK0 &= ~_BV(OCIE0B); // disable timer
   clear_display();
+  display_on_count = 0;
 }
 void enable_button_counter() {
   TIMSK0 |= _BV(OCIE0A); // enable timer
@@ -144,4 +147,12 @@ ISR(TIMER0_COMPA_vect) {
 
 ISR(TIMER1_COMPA_vect) {
   increment_seconds();
+
+  if (mode == MODE_DISPLAY_TIME) {
+    display_on_count++;
+    if (display_on_count > DISPLAY_AUTO_SHUTOFF_SECONDS) {
+      mode = MODE_OFF;
+      disable_display();
+    }
+  }
 }
