@@ -3,6 +3,7 @@
 #include <avr/sleep.h>
 #include <util/delay.h>
 #include <stdbool.h>
+#include <stdlib.h>
 #include "display.h"
 #include "button.h"
 #include "accelerometer.h"
@@ -12,7 +13,7 @@
 #define MODE_SET_HOURS 2
 #define MODE_SET_MINUTES 3
 
-#define BUTTON_PRESS_SHORT_THRESHOLD 10
+#define BUTTON_PRESS_SHORT_THRESHOLD 5
 #define BUTTON_PRESS_LONG_THRESHOLD 200
 #define DISPLAY_AUTO_SHUTOFF_SECONDS 4
 #define BLINK_RATE 20
@@ -31,6 +32,11 @@ volatile bool blink_on = true;
 volatile uint16_t xsample = 0;
 volatile uint16_t ysample = 0;
 volatile bool cleared = false;
+volatile bool show_digit = false;
+volatile uint16_t blink_count = 0;
+volatile uint8_t digit0_value, digit1_value, digit2_value, digit3_value;
+volatile bool digits_changed;
+
 
 void configure_clock_timer() {
   TCCR1A = 0;  
@@ -42,8 +48,8 @@ void configure_clock_timer() {
 void configure_display_timer() {
   TCCR0A = _BV(WGM01); // mode = CTC 
   TCCR0B = _BV(CS00); // Mode = CTC, no prescaler
-  OCR0A = 100; // increment button presses every 100 ticks
-  OCR0B = 5; // update display every 5 ticks
+  OCR0A = 200; // increment button presses every 100 ticks
+  OCR0B = 50; // update display every 5 ticks
 }
 
 void enable_display() {
@@ -87,6 +93,17 @@ void increment_seconds() {
       }
     }
   }
+  digits_changed = true;
+}
+
+void calculate_digits() {
+  div_t hours = div(current.hours, 10);
+  div_t minutes = div(current.minutes, 10);
+
+  digit0_value = hours.quot; 
+  digit1_value = hours.rem; 
+  digit2_value = minutes.quot; 
+  digit3_value = minutes.rem; 
 }
 
 void handle_short_button_press() {
@@ -103,11 +120,13 @@ void handle_short_button_press() {
       temp.hours++;
       if (temp.hours > 12)
         temp.hours = 1;
+      digits_changed = true;
       break;
     case MODE_SET_MINUTES:
       temp.minutes++;
       if (temp.minutes > 59)
         temp.minutes = 0;
+      digits_changed = true;
       break;
   }
 }
@@ -143,6 +162,7 @@ int main() {
   initialize();
 
   time.hours = 12;
+  digits_changed = true;
 
   sei();
 
@@ -165,9 +185,6 @@ ISR(INT0_vect) {
   }
 }
 
-volatile bool show_digit = false;
-volatile uint16_t blink_count = 0;
-
 ISR(TIMER0_COMPB_vect) {
   if (mode == MODE_SET_HOURS || mode == MODE_SET_MINUTES) {
     current = temp;
@@ -185,35 +202,40 @@ ISR(TIMER0_COMPB_vect) {
 
   show_digit = true;
 
+  if (digits_changed) {
+    calculate_digits();
+    digits_changed = false;
+  }
+
   switch (current_digit) {
     case 0:
-      current_digit_val = current.hours / 10; 
+      current_digit_val = digit0_value; 
       if (current_digit_val == 0) 
         show_digit = false;
       else if (mode == MODE_SET_HOURS)
         show_digit = blink_on;
       break;
     case 1:
-      current_digit_val = current.hours % 10; 
+      current_digit_val = digit1_value; 
       if (mode == MODE_SET_HOURS)
         show_digit = blink_on;
       break;
     case 2:
-      current_digit_val = current.minutes / 10; 
+      current_digit_val = digit2_value; 
       if (mode == MODE_SET_MINUTES)
         show_digit = blink_on;
       break;
     case 3:
-      current_digit_val = current.minutes % 10; 
+      current_digit_val = digit3_value; 
       if (mode == MODE_SET_MINUTES)
         show_digit = blink_on;
       break;
   }
 
-  clear_display();
+  disable_digit(current_digit == 0 ? 3 : current_digit-1);
   if (show_digit) {
-    enable_digit(current_digit);
     update_display(current_digit_val, current_digit == 1);
+    enable_digit(current_digit);
   }
 
   if(++current_digit > 3) 

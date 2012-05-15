@@ -148,43 +148,41 @@ void disable_digit(uint8_t digit) {
 }
 
 void clear_display() {
-  LED_A_PORT |= _BV(LED_A_INDEX);
-  LED_B_PORT |= _BV(LED_B_INDEX);
-  LED_C_PORT |= _BV(LED_C_INDEX);
-  LED_D_PORT |= _BV(LED_D_INDEX);
-  LED_E_PORT |= _BV(LED_E_INDEX);
-  LED_F_PORT |= _BV(LED_F_INDEX);
-  LED_G_PORT |= _BV(LED_G_INDEX);
-  LED_DP_PORT |= _BV(LED_DP_INDEX);
+  PORTC |= _BV(LED_A_INDEX) | _BV(LED_B_INDEX) | _BV(LED_C_INDEX) | _BV(LED_D_INDEX) | _BV(LED_E_INDEX);
+  PORTD |= _BV(LED_F_INDEX) | _BV(LED_G_INDEX) | _BV(LED_DP_INDEX);
 }
 
 void update_display(uint8_t number, bool show_dp) {
+  uint8_t map = pgm_read_byte(&character_map[number]);
+  uint8_t cmask = PORTC | _BV(LED_A_INDEX) | _BV(LED_B_INDEX) | _BV(LED_C_INDEX) | _BV(LED_D_INDEX) | _BV(LED_E_INDEX);
+  uint8_t dmask = PORTD | _BV(LED_F_INDEX) | _BV(LED_G_INDEX) | _BV(LED_DP_INDEX);
+
+  if (map & SEGMENT_A)
+    cmask &= ~_BV(LED_A_INDEX);
+
+  if (map & SEGMENT_B)
+    cmask &= ~_BV(LED_B_INDEX);
+
+  if (map & SEGMENT_C)
+    cmask &= ~_BV(LED_C_INDEX);
+
+  if (map & SEGMENT_D)
+    cmask &= ~_BV(LED_D_INDEX);
+
+  if (map & SEGMENT_E)
+    cmask &= ~_BV(LED_E_INDEX);
+
+  if (map & SEGMENT_F)
+    dmask &= ~_BV(LED_F_INDEX);
+
+  if (map & SEGMENT_G)
+    dmask &= ~_BV(LED_G_INDEX);
 
   if (show_dp)
-    LED_DP_PORT &= ~_BV(LED_DP_INDEX);
+    dmask &= ~_BV(LED_DP_INDEX);
 
-  uint8_t mask = pgm_read_byte(&character_map[number]);
-
-  if (mask & SEGMENT_A)
-    LED_A_PORT &= ~_BV(LED_A_INDEX);
-
-  if (mask & SEGMENT_B)
-    LED_B_PORT &= ~_BV(LED_B_INDEX);
-
-  if (mask & SEGMENT_C)
-    LED_C_PORT &= ~_BV(LED_C_INDEX);
-
-  if (mask & SEGMENT_D)
-    LED_D_PORT &= ~_BV(LED_D_INDEX);
-
-  if (mask & SEGMENT_E)
-    LED_E_PORT &= ~_BV(LED_E_INDEX);
-
-  if (mask & SEGMENT_F)
-    LED_F_PORT &= ~_BV(LED_F_INDEX);
-
-  if (mask & SEGMENT_G)
-    LED_G_PORT &= ~_BV(LED_G_INDEX);
+  PORTC = cmask;
+  PORTD = dmask;
 }
 
 #endif
