@@ -41,7 +41,7 @@ volatile bool digits_changed;
 void configure_clock_timer() {
   TCCR1A = 0;  
   TCCR1B = _BV(WGM12) | _BV(CS12) | _BV(CS10);  //set mode = CTC, prescaler = clock/1024
-  OCR1A  = 32;
+  OCR1A  = 31;
   OCR1B  = 4;
   TIMSK1 = _BV(OCIE1A) | _BV(OCIE1B); //enable interrupt on overflow
 }
