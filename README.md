@@ -2,6 +2,8 @@
 
 Inspired by the awesome SolderTime watch by [Spikenzie Labs](http://spikenzielabs.com/SpikenzieLabs/SolderTime.html)
 
+![Watch Picture](https://github.com/joshnuss/accelerometer-watch/raw/master/docs/watch.jpg)
+
 The Accelerometer Watch uses an accelerometer to detect when the wearer lifts their arm. 
 The display is automatically turned on when the arm is lifted and the turned off to conserve power when the arm is lowered.
 Most parts have been changed to surface mount to reduce the overall size and cost of the watch.
