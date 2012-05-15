@@ -145,6 +145,7 @@ void handle_long_button_press() {
       break;
     case MODE_SET_HOURS:
       time = temp;
+      time.seconds = 0;
       mode = MODE_DISPLAY_TIME;
       enable_display();
       break;
